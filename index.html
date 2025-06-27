@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="pageTitle">AccessPort - منفذ الوصول</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;800&family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0ea5e9; /* Sky Blue */
+            --background-color: #0f172a; /* Slate 900 */
+            --card-background: #1e293b; /* Slate 800 */
+            --text-color: #cbd5e1; /* Slate 300 */
+            --text-muted: #64748b; /* Slate 500 */
+            --border-color: #334155; /* Slate 700 */
+        }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .header-title {
+             font-family: 'Exo 2', sans-serif;
+        }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-btn { padding: 0.75rem 1.5rem; border-radius: 9999px; font-weight: 700; transition: all 0.3s ease; border: 2px solid var(--border-color); background-color: var(--card-background); color: var(--text-color); flex-grow: 1; text-align: center; }
+        .nav-btn.active { background-color: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 0 15px rgba(14, 165, 233, 0.5); }
+        .card { background: var(--card-background); border-radius: 1rem; border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border-inline-start: 4px solid transparent; }
+        .admin-post { border-inline-start-color: var(--primary-color); }
+        .pinned-post { border-inline-start-color: #FBBF24; }
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); transition: bottom 0.5s ease-in-out; z-index: 1000; }
+        #toast.show { bottom: 20px; }
+        #admin-controls { display: none; }
+        .input-field { background-color: #334155; border: 1px solid #475569; color: white; }
+        .font-mono { font-family: 'Exo 2', monospace; font-weight: 600; color: var(--primary-color); }
+        .ad-space { background-color: var(--border-color); border: 2px dashed var(--text-muted); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: bold; border-radius: 1rem; }
+    </style>
+    <!-- يمكنك وضع أكواد Adsterra العامة هنا، مثل كود Social Bar أو Popunder -->
+</head>
+<body>
+
+    <div class="container mx-auto p-4 md:p-6">
+        <!-- Language Toggle Bar -->
+        <div class="w-full flex justify-end mb-4">
+            <button id="lang-toggle" onclick="toggleLanguage()" class="bg-slate-700 text-slate-300 w-16 h-10 rounded-full text-sm font-bold hover:bg-slate-600 transition flex items-center justify-center">EN</button>
+        </div>
+
+        <!-- Header -->
+        <header class="text-center my-6">
+            <h1 class="header-title text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300 pb-2">AccessPort</h1>
+            <p class="text-lg text-slate-400 mt-2" data-lang-key="subtitle">بوابتك للوصول إلى الحسابات الرقمية</p>
+        </header>
+
+        <!-- Admin Controls -->
+        <div id="admin-controls" class="text-center mb-4">
+             <div class="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg relative inline-block">
+                <strong class="font-bold" data-lang-key="adminModeActive">وضع المسؤول مفعل!</strong>
+                <button onclick="exitAdminMode()" class="absolute top-0 bottom-0 start-0 px-4 py-3 text-red-400 hover:text-red-200"><i class="fas fa-sign-out-alt"></i><span data-lang-key="exit">خروج</span></button>
+            </div>
+        </div>
+        
+        <!-- Navigation -->
+        <nav class="flex justify-center items-center gap-2 md:gap-4 my-8 p-2 bg-slate-900 rounded-full w-full max-w-sm mx-auto">
+            <button class="nav-btn active" onclick="switchView('accountsView')"><i class="fas fa-list-ul me-2"></i><span data-lang-key="navAccounts">الحسابات</span></button>
+            <button class="nav-btn" onclick="switchView('publishView')"><i class="fas fa-paper-plane me-2"></i><span data-lang-key="navPublish">نشر</span></button>
+        </nav>
+
+        <!-- Views Container -->
+        <main>
+            <!-- View 1: Accounts List -->
+            <div id="accountsView" class="view active">
+                <h2 class="text-3xl font-bold mb-2 text-center text-slate-200" data-lang-key="publicListTitle">قائمة النشر العامة</h2>
+                <p id="accounts-counter" class="text-center text-slate-400 mb-6"></p>
+
+                <!-- Ad Space 1 (Top Banner) -->
+                <div class="my-6 max-w-4xl mx-auto">
+                    <div class="ad-space h-24 w-full">
+                        <!-- ضع كود إعلان البانر مقاس 728x90 من Adsterra هنا -->
+                        <span data-lang-key="adSpace">مساحة إعلانية</span>
+                    </div>
+                </div>
+
+                <div class="mb-6 max-w-4xl mx-auto flex flex-col md:flex-row gap-4">
+                    <div class="relative flex-grow">
+                        <input type="text" id="search-bar" onkeyup="handleSearch()" class="w-full p-4 ps-12 border rounded-full input-field focus:ring-2 focus:ring-sky-500 transition" data-lang-key="searchPlaceholder">
+                        <i class="fas fa-search absolute start-5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    </div>
+                    <div id="admin-filter-container" class="text-center"></div>
+                </div>
+                <div id="public-accounts-list" class="space-y-4 max-w-4xl mx-auto"></div>
+            </div>
+
+            <!-- View 2: Publishing Form -->
+            <div id="publishView" class="view">
+                <h2 class="text-3xl font-bold mb-6 text-center text-slate-200" data-lang-key="publishNewTitle">نشر حساب جديد</h2>
+                <div class="card p-8 max-w-lg mx-auto">
+                    <form id="publish-form" class="space-y-4">
+                        <div>
+                            <label class="font-semibold text-slate-300" for="publish-service" data-lang-key="serviceNameLabel">اسم الخدمة</label>
+                            <input type="text" id="publish-service" placeholder="" class="w-full mt-1 p-3 border rounded-lg input-field" required>
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-300" for="publish-username" data-lang-key="usernameLabel">المستخدم</label>
+                            <input type="text" id="publish-username" class="w-full mt-1 p-3 border rounded-lg input-field" required data-lang-key="usernamePlaceholder">
+                        </div>
+                        <div>
+                            <label class="font-semibold text-slate-300" for="publish-password" data-lang-key="passwordLabel">كلمة السر</label>
+                            <input type="text" id="publish-password" class="w-full mt-1 p-3 border rounded-lg input-field" required data-lang-key="passwordPlaceholder">
+                        </div>
+                        <button type="submit" class="w-full bg-sky-500 text-white font-bold py-3 rounded-lg hover:bg-sky-600 transition duration-300"><i class="fas fa-upload me-2"></i><span data-lang-key="publishNowButton">نشر الآن</span></button>
+                    </form>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Ad Space 2 (Bottom Banner) -->
+        <div class="my-8 max-w-4xl mx-auto">
+            <div class="ad-space h-24 w-full">
+                <!-- ضع كود إعلان بانر آخر هنا -->
+                <span data-lang-key="adSpace">مساحة إعلانية</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="text-white py-3 px-6 rounded-full shadow-lg"><i class="fas fa-check-circle me-2"></i><span id="toast-message"></span></div>
+
+    <script>
+        const translations = {
+            en: {
+                adSpace: "Ad Space", pageTitle: "AccessPort - Your Gateway", subtitle: "Your gateway to digital accounts", adminModeActive: "Admin Mode Active!", exit: "Exit", navAccounts: "Accounts", navPublish: "Publish", publicListTitle: "Public Accounts List", searchPlaceholder: "Search for a game or service...", publishNewTitle: "Publish a New Account", serviceNameLabel: "Service Name", usernameLabel: "Username", usernamePlaceholder: "Username or Email", passwordLabel: "Password", passwordPlaceholder: "Account's password", publishNowButton: "Publish Now", totalAccounts: "Total Accounts Available:", noResults: "No results match your search criteria.", noAccounts: "The public list is empty. Publish an account to get started!", adminFilterButton: `Filter (Reports > ${4})`, adminFilterAll: "Show All Accounts", publishSuccess: "Account published successfully!", adminEnterSuccess: "Admin mode activated successfully!", adminExitSuccess: "Exited admin mode.", reportSuccess: "Thank you! Your report has been received.", reportFail: "You have already reported this account.", deleteSuccess: "Post deleted successfully.", copySuccess: "Copied!", copyFail: "Copy failed!", user: "User", pass: "Password", copyUser: "Copy User", copyPass: "Copy Password", report: "Report", postedOn: "Posted on:", pin: "Pin", unpin: "Unpin", delete: "Delete", verifiedTooltip: "Verified post by admin", pinnedTooltip: "Pinned post",
+            },
+            ar: {
+                adSpace: "مساحة إعلانية", pageTitle: "AccessPort - منفذ الوصول", subtitle: "بوابتك للوصول إلى الحسابات الرقمية", adminModeActive: "وضع المسؤول مفعل!", exit: "خروج", navAccounts: "الحسابات", navPublish: "نشر", publicListTitle: "قائمة النشر العامة", searchPlaceholder: "ابحث عن لعبة أو خدمة...", publishNewTitle: "نشر حساب جديد", serviceNameLabel: "اسم الخدمة", usernameLabel: "المستخدم", usernamePlaceholder: "اسم المستخدم أو البريد الإلكتروني", passwordLabel: "كلمة السر", passwordPlaceholder: "كلمة سر الحساب", publishNowButton: "نشر الآن", totalAccounts: "إجمالي الحسابات المتوفرة:", noResults: "لا توجد نتائج تطابق معايير البحث.", noAccounts: "القائمة العامة فارغة. انشر حسابًا ليبدأ التفاعل!", adminFilterButton: `فرز (البلاغات > ${4})`, adminFilterAll: "عرض كل الحسابات", publishSuccess: "تم نشر الحساب بنجاح!", adminEnterSuccess: "تم تفعيل وضع المسؤول بنجاح!", adminExitSuccess: "تم الخروج من وضع المسؤول.", reportSuccess: "شكراً لك! تم استلام بلاغك.", reportFail: "لقد أبلغت عن هذا الحساب من قبل.", deleteSuccess: "تم حذف المنشور بنجاح.", copySuccess: "تم النسخ!", copyFail: "فشل النسخ!", user: "المستخدم", pass: "كلمة السر", copyUser: "نسخ المستخدم", copyPass: "نسخ كلمة السر", report: "إبلاغ", postedOn: "تم النشر في:", pin: "تثبيت", unpin: "إلغاء التثبيت", delete: "حذف", verifiedTooltip: "منشور موثوق من المسؤول", pinnedTooltip: "منشور مثبت",
+            }
+        };
+        let currentLang = 'ar'; 
+        const REPORT_THRESHOLD = 5;
+        let isReportFilterActive = false;
+        let viewObserver = null;
+        const getFromStorage = (key) => JSON.parse(localStorage.getItem(key)) || [];
+        const saveToStorage = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+        const escapeHTML = (str) => { const p = document.createElement("p"); p.textContent = str; return p.innerHTML; };
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            localStorage.setItem('user-lang', lang);
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if(translations[lang][key] !== undefined){
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.placeholder = translations[lang][key];
+                    } else {
+                        el.innerHTML = translations[lang][key];
+                    }
+                }
+            });
+            document.getElementById('lang-toggle').textContent = lang === 'ar' ? 'EN' : 'AR';
+            const activeView = document.querySelector('.view.active')?.id || 'accountsView';
+            switchView(activeView, true);
+        }
+        function toggleLanguage() { setLanguage(currentLang === 'ar' ? 'en' : 'ar'); }
+        document.addEventListener('DOMContentLoaded', () => {
+            const userLang = localStorage.getItem('user-lang') || (navigator.language.startsWith('ar') ? 'ar' : 'en');
+            setLanguage(userLang);
+            checkAdminMode();
+            switchView('accountsView');
+            document.getElementById('publish-form').addEventListener('submit', handleFormSubmit);
+        });
+        function switchView(viewId, isLangChange = false) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`button[onclick="switchView('${viewId}')"]`).classList.add('active');
+            if (viewId === 'accountsView') {
+                if (!isLangChange) {
+                    const searchBar = document.getElementById('search-bar');
+                    if (searchBar) searchBar.value = '';
+                }
+                loadPublicAccounts();
+            }
+        }
+        function showToast(key, isError = false) {
+            const message = translations[currentLang][key] || key;
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.className = `text-white py-3 px-6 rounded-full shadow-lg ${isError ? 'bg-red-500' : 'bg-sky-500'}`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+        function checkAdminMode() {
+            const isAdmin = sessionStorage.getItem('isAdmin') === 'true';
+            document.getElementById('admin-controls').style.display = isAdmin ? 'block' : 'none';
+            const adminFilterContainer = document.getElementById('admin-filter-container');
+            if(isAdmin) {
+                const buttonText = isReportFilterActive ? translations[currentLang].adminFilterAll : translations[currentLang].adminFilterButton;
+                adminFilterContainer.innerHTML = `<button onclick="toggleReportFilter()" class="w-full md:w-auto p-4 rounded-full bg-orange-500 text-white font-bold hover:bg-orange-600 transition shadow-sm"><i class="fas fa-filter"></i> ${buttonText}</button>`;
+            } else {
+                adminFilterContainer.innerHTML = '';
+            }
+            return isAdmin;
+        }
+        function handleFormSubmit(e) { e.preventDefault(); const service = document.getElementById('publish-service').value; const password = document.getElementById('publish-password').value; if (service.toLowerCase() === 'dragon' && password === 'dragon57t') { enterAdminMode(); e.target.reset(); return; } addPublicAccount(e); }
+        function addPublicAccount(e) { const newAccount = { id: Date.now().toString(), service: document.getElementById('publish-service').value, username: document.getElementById('publish-username').value, password: document.getElementById('publish-password').value, views: 0, reports: 0, isAdminPost: checkAdminMode(), isPinned: false }; const accounts = getFromStorage('public_accounts'); accounts.unshift(newAccount); saveToStorage('public_accounts', accounts); e.target.reset(); showToast('publishSuccess'); switchView('accountsView'); }
+        function reportAccount(id) { let reportedLog = getFromStorage('reported_accounts_log'); if(reportedLog.includes(id)) { showToast('reportFail', true); return; } let accounts = getFromStorage('public_accounts'); const accountIndex = accounts.findIndex(acc => acc.id === id); if(accountIndex !== -1) { accounts[accountIndex].reports = (accounts[accountIndex].reports || 0) + 1; saveToStorage('public_accounts', accounts); reportedLog.push(id); saveToStorage('reported_accounts_log', reportedLog); document.querySelector(`#reports-${id} span`).textContent = accounts[accountIndex].reports; showToast('reportSuccess'); } }
+        function handleSearch() { loadPublicAccounts(document.getElementById('search-bar').value); }
+        function togglePin(id) { let accounts = getFromStorage('public_accounts'); const accountIndex = accounts.findIndex(acc => acc.id === id); if(accountIndex !== -1) { accounts[accountIndex].isPinned = !accounts[accountIndex].isPinned; saveToStorage('public_accounts', accounts); loadPublicAccounts(document.getElementById('search-bar').value); } }
+        function enterAdminMode() { sessionStorage.setItem('isAdmin', 'true'); checkAdminMode(); showToast('adminEnterSuccess'); switchView('accountsView'); }
+        function exitAdminMode() { sessionStorage.removeItem('isAdmin'); isReportFilterActive = false; checkAdminMode(); showToast('adminExitSuccess'); loadPublicAccounts(); }
+        function loadPublicAccounts(searchTerm = '') { const allAccounts = getFromStorage('public_accounts'); document.getElementById('accounts-counter').innerHTML = `${translations[currentLang].totalAccounts} <span class="font-mono text-sky-400">${allAccounts.length}</span>`; let accounts = allAccounts; const list = document.getElementById('public-accounts-list'); const isAdmin = checkAdminMode(); list.innerHTML = ''; if (viewObserver) viewObserver.disconnect(); const normalizedSearchTerm = searchTerm.trim().toLowerCase(); if (normalizedSearchTerm) { accounts = accounts.filter(acc => acc.service.toLowerCase().includes(normalizedSearchTerm)); } if (isAdmin && isReportFilterActive) { accounts = accounts.filter(acc => (acc.reports || 0) >= REPORT_THRESHOLD); } accounts.sort((a, b) => b.isPinned - a.isPinned || b.id - a.id); if (accounts.length === 0) { list.innerHTML = `<div class="card p-6 text-center text-slate-400">${(normalizedSearchTerm || isReportFilterActive) ? translations[currentLang].noResults : translations[currentLang].noAccounts}</div>`; return; } viewObserver = new IntersectionObserver((entries, observer) => { entries.forEach(entry => { if (entry.isIntersecting) { incrementUniqueViewCount(entry.target.dataset.id); observer.unobserve(entry.target); } }); }, { threshold: 0.5 });
+            
+            const adInterval = 4;
+            let postCounter = 0;
+            accounts.forEach(acc => {
+                const card = document.createElement('div');
+                card.className = `card p-6 ${acc.isPinned ? 'pinned-post' : ''} ${acc.isAdminPost ? 'admin-post' : ''}`;
+                card.dataset.id = acc.id;
+                let adminButtonsHTML = ''; if (isAdmin) { const pinButtonIcon = acc.isPinned ? 'fa-solid fa-circle-xmark' : 'fa-solid fa-thumbtack'; adminButtonsHTML = `<button onclick="togglePin('${acc.id}')" class="bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-yellow-600 transition" title="${translations[currentLang][acc.isPinned ? 'unpin' : 'pin']}"><i class="${pinButtonIcon}"></i></button> <button onclick="unpublishAccount('${acc.id}')" class="bg-red-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-600 transition" title="${translations[currentLang].delete}"><i class="fas fa-trash-alt"></i></button>`; } const verifiedIconHTML = acc.isAdminPost ? `<span class="text-sky-400" title="${translations[currentLang].verifiedTooltip}"><i class="fas fa-check-circle"></i></span>` : ''; const pinnedIconHTML = acc.isPinned ? `<span class="text-yellow-400" title="${translations[currentLang].pinnedTooltip}"><i class="fas fa-thumbtack"></i></span>` : ''; const reportButtonHTML = !acc.isAdminPost ? `<button onclick="reportAccount('${acc.id}')" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-flag me-2"></i>${translations[currentLang].report}</button>` : ''; const publishDate = new Date(parseInt(acc.id)).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-GB'); card.innerHTML = `<div class="flex justify-between items-start"><h3 class="header-title font-bold text-2xl text-slate-100 flex items-center gap-2">${pinnedIconHTML} ${escapeHTML(acc.service)} ${verifiedIconHTML}</h3><div class="flex flex-col items-end gap-2 text-sm text-slate-400"><span id="views-${acc.id}" class="flex items-center gap-2"><i class="fas fa-eye"></i><span>${acc.views || 0}</span></span> <span id="reports-${acc.id}" class="flex items-center gap-2"><i class="fas fa-flag"></i><span>${acc.reports || 0}</span></span></div></div><p class="text-slate-500 text-sm mb-3">${translations[currentLang].postedOn} ${publishDate}</p><div class="border-t border-slate-700 pt-3 space-y-3"><div class="flex items-center"><strong class="w-24 text-slate-400">${translations[currentLang].user}:</strong><span class="font-mono">${escapeHTML(acc.username)}</span></div><div class="flex items-center"><strong class="w-24 text-slate-400">${translations[currentLang].pass}:</strong><span class="font-mono">${escapeHTML(acc.password)}</span></div></div><div class="flex justify-between items-center gap-2 mt-4 pt-4 border-t border-slate-700"><div class="flex gap-2 flex-wrap"><button onclick="copyToClipboard('${escapeHTML(acc.username)}', this)" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-copy me-2"></i>${translations[currentLang].copyUser}</button> <button onclick="copyToClipboard('${escapeHTML(acc.password)}', this)" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-copy me-2"></i>${translations[currentLang].copyPass}</button> ${reportButtonHTML}</div><div class="flex gap-2">${adminButtonsHTML}</div></div>`;
+                list.appendChild(card);
+                viewObserver.observe(card);
+                postCounter++;
+                if (postCounter % adInterval === 0 && postCounter < accounts.length) {
+                    const adCard = document.createElement('div');
+                    adCard.className = 'ad-space h-24 w-full';
+                    adCard.innerHTML = `<span data-lang-key="adSpace">${translations[currentLang].adSpace}</span>`;
+                    list.appendChild(adCard);
+                }
+            });
+        }
+        function incrementUniqueViewCount(id) { let viewedAccountsLog = getFromStorage('viewed_accounts_log'); if (viewedAccountsLog.includes(id)) return; let publicAccounts = getFromStorage('public_accounts'); const accountIndex = publicAccounts.findIndex(acc => acc.id === id); if (accountIndex !== -1) { publicAccounts[accountIndex].views = (publicAccounts[accountIndex].views || 0) + 1; saveToStorage('public_accounts', publicAccounts); viewedAccountsLog.push(id); saveToStorage('viewed_accounts_log', viewedAccountsLog); document.querySelector(`#views-${id} span`).textContent = publicAccounts[accountIndex].views; } }
+        function unpublishAccount(id) { let accounts = getFromStorage('public_accounts'); accounts = accounts.filter(acc => acc.id !== id); saveToStorage('public_accounts', accounts); loadPublicAccounts(document.getElementById('search-bar').value); showToast('deleteSuccess', true); }
+        function copyToClipboard(text, button) { const textarea = document.createElement('textarea'); textarea.style.position='fixed'; textarea.value=text; document.body.appendChild(textarea); textarea.select(); try { document.execCommand('copy'); const originalText = button.innerHTML; button.innerHTML = `<i class='fas fa-check-circle me-2'></i> ${translations[currentLang].copySuccess}`; button.classList.add('bg-green-600', 'text-white'); setTimeout(() => { button.innerHTML = originalText; button.classList.remove('bg-green-600', 'text-white'); }, 2000); } catch (err) { showToast('copyFail', true); } document.body.removeChild(textarea); }
+    </script>
+</body>
+</html>
