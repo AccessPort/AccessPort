@@ -38,11 +38,9 @@
 <body>
 
     <div class="container mx-auto p-4 md:p-6">
-        <!-- Language Toggle Bar -->
         <div class="w-full flex justify-end mb-4">
             <button id="lang-toggle" onclick="toggleLanguage()" class="bg-slate-700 text-slate-300 w-16 h-10 rounded-full text-sm font-bold hover:bg-slate-600 transition flex items-center justify-center">EN</button>
         </div>
-        <!-- Header, Admin Controls, Navigation... -->
         <header class="text-center my-6">
             <h1 class="header-title text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300 pb-2">AccessPort</h1>
             <p class="text-lg text-slate-400 mt-2" data-lang-key="subtitle">بوابتك للوصول إلى الحسابات الرقمية</p>
@@ -57,9 +55,7 @@
             <button class="nav-btn active" onclick="switchView('accountsView')"><i class="fas fa-list-ul me-2"></i><span data-lang-key="navAccounts">الحسابات</span></button>
             <button class="nav-btn" onclick="switchView('publishView')"><i class="fas fa-paper-plane me-2"></i><span data-lang-key="navPublish">نشر</span></button>
         </nav>
-        
         <main>
-            <!-- Views -->
             <div id="accountsView" class="view active">
                 <h2 class="text-3xl font-bold mb-2 text-center text-slate-200" data-lang-key="publicListTitle">قائمة النشر العامة</h2>
                 <p id="accounts-counter" class="text-center text-slate-400 mb-6"></p>
@@ -93,16 +89,15 @@
                 </div>
             </div>
         </main>
-        
         <div id="toast" class="text-white py-3 px-6 rounded-full shadow-lg"><i class="fas fa-check-circle me-2"></i><span id="toast-message"></span></div>
     </div>
 
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, increment, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, increment, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDJKGkJNJy198d9axSevMO1ybQfVJLtIrQ",
             authDomain: "accessport-11f83.firebaseapp.com",
@@ -124,14 +119,12 @@
         let currentLang = 'ar';
         const REPORT_THRESHOLD = 5;
         let isReportFilterActive = false;
-        let viewObserver = null;
         let isAdmin = false;
 
         const getFromStorage = (key) => JSON.parse(localStorage.getItem(key)) || [];
         const saveToStorage = (key, data) => localStorage.setItem(key, JSON.stringify(data));
         const escapeHTML = (str) => { const p = document.createElement("p"); p.textContent = str; return p.innerHTML; };
         
-        // --- ALL FUNCTIONS MOVED TO BE GLOBALLY ACCESSIBLE ---
         window.toggleLanguage = () => setLanguage(currentLang === 'ar' ? 'en' : 'ar');
         window.switchView = (viewId, isLangChange = false) => {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -139,18 +132,15 @@
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelector(`button[onclick="switchView('${viewId}')"]`).classList.add('active');
             if (viewId === 'accountsView') {
-                if (!isLangChange) {
-                    const searchBar = document.getElementById('search-bar');
-                    if (searchBar) searchBar.value = '';
-                }
+                if (!isLangChange) { document.getElementById('search-bar').value = ''; }
                 loadPublicAccounts();
             }
         };
         window.handleSearch = () => loadPublicAccounts(document.getElementById('search-bar').value);
         window.toggleReportFilter = () => { isReportFilterActive = !isReportFilterActive; loadPublicAccounts(document.getElementById('search-bar').value); checkAdminMode(); };
-        window.exitAdminMode = async () => { try { await signOut(auth); showToast('adminExitSuccess'); } catch (error) { console.error("Sign out failed:", error); } };
-        window.togglePin = async (id, currentPinStatus) => { try { await updateDoc(doc(db, "accounts", id), { isPinned: !currentPinStatus }); } catch(error) { console.error("Error pinning document: ", error); }};
-        window.unpublishAccount = async (id) => { try { await deleteDoc(doc(db, "accounts", id)); showToast('deleteSuccess', true); } catch(error) { console.error("Error deleting document: ", error); }};
+        window.exitAdminMode = async () => { try { await signOut(auth); } catch (error) { console.error("Sign out error", error); } };
+        window.togglePin = async (id, currentPinStatus) => { try { await updateDoc(doc(db, "accounts", id), { isPinned: !currentPinStatus }); } catch(error) { console.error("Pin error", error); }};
+        window.unpublishAccount = async (id) => { try { await deleteDoc(doc(db, "accounts", id)); showToast('deleteSuccess', true); } catch(error) { console.error("Delete error", error); }};
         window.reportAccount = async (id) => {
             let reportedLog = getFromStorage('reported_accounts_log');
             if(reportedLog.includes(id)) { showToast('reportFail', true); return; }
@@ -159,7 +149,7 @@
                 reportedLog.push(id);
                 saveToStorage('reported_accounts_log', reportedLog);
                 showToast('reportSuccess');
-            } catch (error) { console.error("Error reporting: ", error); }
+            } catch (error) { console.error("Report error", error); }
         };
         window.copyToClipboard = (text, button) => { const textarea = document.createElement('textarea'); textarea.style.position='fixed'; textarea.value=text; document.body.appendChild(textarea); textarea.select(); try { document.execCommand('copy'); const originalText = button.innerHTML; button.innerHTML = `<i class='fas fa-check-circle me-2'></i> ${translations[currentLang].copySuccess}`; button.classList.add('bg-green-600', 'text-white'); setTimeout(() => { button.innerHTML = originalText; button.classList.remove('bg-green-600', 'text-white'); }, 2000); } catch (err) { showToast('copyFail', true); } document.body.removeChild(textarea); };
 
@@ -168,23 +158,17 @@
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
             localStorage.setItem('user-lang', lang);
-
             document.querySelectorAll('[data-lang-key]').forEach(el => {
                 const key = el.dataset.langKey;
                 if(translations[lang][key] !== undefined){
-                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                        el.placeholder = translations[lang][key];
-                    } else {
-                        el.innerHTML = translations[lang][key];
-                    }
+                    if (el.tagName === 'INPUT') { el.placeholder = translations[lang][key]; } 
+                    else { el.innerHTML = translations[lang][key]; }
                 }
             });
-            
             document.getElementById('lang-toggle').textContent = lang === 'ar' ? 'EN' : 'AR';
             const activeView = document.querySelector('.view.active')?.id || 'accountsView';
             window.switchView(activeView, true);
         }
-
         function showToast(key, isError = false) {
             const message = translations[currentLang][key] || key;
             const toast = document.getElementById('toast');
@@ -193,7 +177,6 @@
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
-
         function checkAdminMode() {
             document.getElementById('admin-controls').style.display = isAdmin ? 'block' : 'none';
             const adminFilterContainer = document.getElementById('admin-filter-container');
@@ -205,10 +188,16 @@
             }
         }
         
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-            const service = document.getElementById('publish-service').value;
-            const password = document.getElementById('publish-password').value;
+        document.getElementById('publish-form').addEventListener('submit', async (e) => {
+             e.preventDefault();
+            const service = document.getElementById('publish-service').value.trim();
+            const username = document.getElementById('publish-username').value.trim();
+            const password = document.getElementById('publish-password').value.trim();
+
+            if (!service || !username || !password) {
+                showToast("الرجاء ملء جميع الحقول", true);
+                return;
+            }
             
             if (service.toLowerCase() === 'dragon' && password === 'dragon57t') {
                 try {
@@ -220,16 +209,16 @@
             
             try {
                 await addDoc(collection(db, "accounts"), {
-                    service: document.getElementById('publish-service').value,
-                    username: document.getElementById('publish-username').value,
-                    password: document.getElementById('publish-password').value,
-                    views: 0, reports: 0, isAdminPost: isAdmin, isPinned: false, createdAt: new Date()
+                    service: service,
+                    username: username,
+                    password: password,
+                    views: 0, reports: 0, isAdminPost: isAdmin, isPinned: false, createdAt: serverTimestamp()
                 });
                 e.target.reset();
                 showToast('publishSuccess');
                 window.switchView('accountsView');
             } catch (error) { console.error("Error adding document: ", error); }
-        }
+        });
         
         async function incrementUniqueViewCount(id) {
             let viewedAccountsLog = getFromStorage('viewed_accounts_log');
@@ -240,20 +229,21 @@
                 saveToStorage('viewed_accounts_log', viewedAccountsLog);
             } catch(error) { console.error("Error incrementing view: ", error); }
         }
-        
+
+        let unsubscribe;
         function loadPublicAccounts(searchTerm = '') {
+            if (unsubscribe) unsubscribe();
+
             const list = document.getElementById('public-accounts-list');
             const counterElement = document.getElementById('accounts-counter');
             
-            // **FIX:** Removed orderBy from the query to avoid needing a composite index.
             const q = query(collection(db, "accounts"));
             
-            onSnapshot(q, (snapshot) => {
+            unsubscribe = onSnapshot(q, (snapshot) => {
                 let allAccounts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
                 counterElement.innerHTML = `${translations[currentLang].totalAccounts} <span class="font-mono text-sky-400">${allAccounts.length}</span>`;
+                
                 let accountsToRender = allAccounts;
-
                 const normalizedSearchTerm = searchTerm.trim().toLowerCase();
                 if (normalizedSearchTerm) {
                     accountsToRender = accountsToRender.filter(acc => acc.service.toLowerCase().includes(normalizedSearchTerm));
@@ -261,10 +251,10 @@
                 if (isAdmin && isReportFilterActive) {
                     accountsToRender = accountsToRender.filter(acc => (acc.reports || 0) >= REPORT_THRESHOLD);
                 }
-                // **FIX:** Sorting is now done on the client-side.
+                
                 accountsToRender.sort((a, b) => {
                     if (a.isPinned !== b.isPinned) return b.isPinned - a.isPinned;
-                    return b.createdAt.seconds - a.createdAt.seconds;
+                    return (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0);
                 });
 
                 list.innerHTML = '';
