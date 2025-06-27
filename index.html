@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rt
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,7 +39,7 @@
         #admin-controls { display: none; }
         .input-field { background-color: #334155; border: 1px solid #475569; color: white; }
         .font-mono { font-family: 'Exo 2', monospace; font-weight: 600; color: var(--primary-color); }
-        .ad-space { background-color: var(--border-color); border: 2px dashed var(--text-muted); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: bold; border-radius: 1rem; }
+        .ad-space { background-color: var(--border-color); border: 2px dashed var(--text-muted); display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: bold; border-radius: 1rem; overflow: hidden; }
     </style>
     <!-- يمكنك وضع أكواد Adsterra العامة هنا، مثل كود Social Bar أو Popunder -->
 </head>
@@ -56,7 +56,7 @@
             <h1 class="header-title text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300 pb-2">AccessPort</h1>
             <p class="text-lg text-slate-400 mt-2" data-lang-key="subtitle">بوابتك للوصول إلى الحسابات الرقمية</p>
         </header>
-
+        
         <!-- Admin Controls -->
         <div id="admin-controls" class="text-center mb-4">
              <div class="bg-red-900/50 border border-red-500 text-red-300 px-4 py-3 rounded-lg relative inline-block">
@@ -81,17 +81,17 @@
                 <!-- Ad Space 1 (Top Banner) -->
                 <div class="my-6 max-w-4xl mx-auto">
                     <div class="ad-space h-24 w-full">
-                        <!-- ضع كود إعلان البانر مقاس <script type="text/javascript">
-	atOptions = {
-		'key' : '75562aef2ae9729219ccad59c97067af',
-		'format' : 'iframe',
-		'height' : 90,
-		'width' : 728,
-		'params' : {}
-	};
-</script>
-<script type="text/javascript" src="//www.highperformanceformat.com/75562aef2ae9729219ccad59c97067af/invoke.js"></script> من Adsterra هنا -->
-                        <span data-lang-key="adSpace">مساحة إعلانية</span>
+                        <!-- تم نقل كود الإعلان إلى هنا -->
+                        <script type="text/javascript">
+                            atOptions = {
+                                'key' : '75562aef2ae9729219ccad59c97067af',
+                                'format' : 'iframe',
+                                'height' : 90,
+                                'width' : 728,
+                                'params' : {}
+                            };
+                        </script>
+                        <script type="text/javascript" src="//www.highperformanceformat.com/75562aef2ae9729219ccad59c97067af/invoke.js"></script>
                     </div>
                 </div>
 
@@ -131,17 +131,17 @@
         <!-- Ad Space 2 (Bottom Banner) -->
         <div class="my-8 max-w-4xl mx-auto">
             <div class="ad-space h-24 w-full">
-                <!-- <script type="text/javascript">
-	atOptions = {
-		'key' : '75562aef2ae9729219ccad59c97067af',
-		'format' : 'iframe',
-		'height' : 90,
-		'width' : 728,
-		'params' : {}
-	};
-</script>
-<script type="text/javascript" src="//www.highperformanceformat.com/75562aef2ae9729219ccad59c97067af/invoke.js"></script> كود إعلان بانر آخر هنا -->
-                <span data-lang-key="adSpace">مساحة إعلانية</span>
+                <!-- تم نقل كود الإعلان إلى هنا -->
+                 <script type="text/javascript">
+                    atOptions = {
+                        'key' : '75562aef2ae9729219ccad59c97067af',
+                        'format' : 'iframe',
+                        'height' : 90,
+                        'width' : 728,
+                        'params' : {}
+                    };
+                </script>
+                <script type="text/javascript" src="//www.highperformanceformat.com/75562aef2ae9729219ccad59c97067af/invoke.js"></script>
             </div>
         </div>
     </div>
@@ -172,11 +172,8 @@
             document.querySelectorAll('[data-lang-key]').forEach(el => {
                 const key = el.dataset.langKey;
                 if(translations[lang][key] !== undefined){
-                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                        el.placeholder = translations[lang][key];
-                    } else {
-                        el.innerHTML = translations[lang][key];
-                    }
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = translations[lang][key];
+                    else el.innerHTML = translations[lang][key];
                 }
             });
             document.getElementById('lang-toggle').textContent = lang === 'ar' ? 'EN' : 'AR';
@@ -231,26 +228,7 @@
         function togglePin(id) { let accounts = getFromStorage('public_accounts'); const accountIndex = accounts.findIndex(acc => acc.id === id); if(accountIndex !== -1) { accounts[accountIndex].isPinned = !accounts[accountIndex].isPinned; saveToStorage('public_accounts', accounts); loadPublicAccounts(document.getElementById('search-bar').value); } }
         function enterAdminMode() { sessionStorage.setItem('isAdmin', 'true'); checkAdminMode(); showToast('adminEnterSuccess'); switchView('accountsView'); }
         function exitAdminMode() { sessionStorage.removeItem('isAdmin'); isReportFilterActive = false; checkAdminMode(); showToast('adminExitSuccess'); loadPublicAccounts(); }
-        function loadPublicAccounts(searchTerm = '') { const allAccounts = getFromStorage('public_accounts'); document.getElementById('accounts-counter').innerHTML = `${translations[currentLang].totalAccounts} <span class="font-mono text-sky-400">${allAccounts.length}</span>`; let accounts = allAccounts; const list = document.getElementById('public-accounts-list'); const isAdmin = checkAdminMode(); list.innerHTML = ''; if (viewObserver) viewObserver.disconnect(); const normalizedSearchTerm = searchTerm.trim().toLowerCase(); if (normalizedSearchTerm) { accounts = accounts.filter(acc => acc.service.toLowerCase().includes(normalizedSearchTerm)); } if (isAdmin && isReportFilterActive) { accounts = accounts.filter(acc => (acc.reports || 0) >= REPORT_THRESHOLD); } accounts.sort((a, b) => b.isPinned - a.isPinned || b.id - a.id); if (accounts.length === 0) { list.innerHTML = `<div class="card p-6 text-center text-slate-400">${(normalizedSearchTerm || isReportFilterActive) ? translations[currentLang].noResults : translations[currentLang].noAccounts}</div>`; return; } viewObserver = new IntersectionObserver((entries, observer) => { entries.forEach(entry => { if (entry.isIntersecting) { incrementUniqueViewCount(entry.target.dataset.id); observer.unobserve(entry.target); } }); }, { threshold: 0.5 });
-            
-            const adInterval = 4;
-            let postCounter = 0;
-            accounts.forEach(acc => {
-                const card = document.createElement('div');
-                card.className = `card p-6 ${acc.isPinned ? 'pinned-post' : ''} ${acc.isAdminPost ? 'admin-post' : ''}`;
-                card.dataset.id = acc.id;
-                let adminButtonsHTML = ''; if (isAdmin) { const pinButtonIcon = acc.isPinned ? 'fa-solid fa-circle-xmark' : 'fa-solid fa-thumbtack'; adminButtonsHTML = `<button onclick="togglePin('${acc.id}')" class="bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-yellow-600 transition" title="${translations[currentLang][acc.isPinned ? 'unpin' : 'pin']}"><i class="${pinButtonIcon}"></i></button> <button onclick="unpublishAccount('${acc.id}')" class="bg-red-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-600 transition" title="${translations[currentLang].delete}"><i class="fas fa-trash-alt"></i></button>`; } const verifiedIconHTML = acc.isAdminPost ? `<span class="text-sky-400" title="${translations[currentLang].verifiedTooltip}"><i class="fas fa-check-circle"></i></span>` : ''; const pinnedIconHTML = acc.isPinned ? `<span class="text-yellow-400" title="${translations[currentLang].pinnedTooltip}"><i class="fas fa-thumbtack"></i></span>` : ''; const reportButtonHTML = !acc.isAdminPost ? `<button onclick="reportAccount('${acc.id}')" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-flag me-2"></i>${translations[currentLang].report}</button>` : ''; const publishDate = new Date(parseInt(acc.id)).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-GB'); card.innerHTML = `<div class="flex justify-between items-start"><h3 class="header-title font-bold text-2xl text-slate-100 flex items-center gap-2">${pinnedIconHTML} ${escapeHTML(acc.service)} ${verifiedIconHTML}</h3><div class="flex flex-col items-end gap-2 text-sm text-slate-400"><span id="views-${acc.id}" class="flex items-center gap-2"><i class="fas fa-eye"></i><span>${acc.views || 0}</span></span> <span id="reports-${acc.id}" class="flex items-center gap-2"><i class="fas fa-flag"></i><span>${acc.reports || 0}</span></span></div></div><p class="text-slate-500 text-sm mb-3">${translations[currentLang].postedOn} ${publishDate}</p><div class="border-t border-slate-700 pt-3 space-y-3"><div class="flex items-center"><strong class="w-24 text-slate-400">${translations[currentLang].user}:</strong><span class="font-mono">${escapeHTML(acc.username)}</span></div><div class="flex items-center"><strong class="w-24 text-slate-400">${translations[currentLang].pass}:</strong><span class="font-mono">${escapeHTML(acc.password)}</span></div></div><div class="flex justify-between items-center gap-2 mt-4 pt-4 border-t border-slate-700"><div class="flex gap-2 flex-wrap"><button onclick="copyToClipboard('${escapeHTML(acc.username)}', this)" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-copy me-2"></i>${translations[currentLang].copyUser}</button> <button onclick="copyToClipboard('${escapeHTML(acc.password)}', this)" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-copy me-2"></i>${translations[currentLang].copyPass}</button> ${reportButtonHTML}</div><div class="flex gap-2">${adminButtonsHTML}</div></div>`;
-                list.appendChild(card);
-                viewObserver.observe(card);
-                postCounter++;
-                if (postCounter % adInterval === 0 && postCounter < accounts.length) {
-                    const adCard = document.createElement('div');
-                    adCard.className = 'ad-space h-24 w-full';
-                    adCard.innerHTML = `<span data-lang-key="adSpace">${translations[currentLang].adSpace}</span>`;
-                    list.appendChild(adCard);
-                }
-            });
-        }
+        function loadPublicAccounts(searchTerm = '') { const allAccounts = getFromStorage('public_accounts'); document.getElementById('accounts-counter').innerHTML = `${translations[currentLang].totalAccounts} <span class="font-mono text-sky-400">${allAccounts.length}</span>`; let accounts = allAccounts; const list = document.getElementById('public-accounts-list'); const isAdmin = checkAdminMode(); list.innerHTML = ''; if (viewObserver) viewObserver.disconnect(); const normalizedSearchTerm = searchTerm.trim().toLowerCase(); if (normalizedSearchTerm) { accounts = accounts.filter(acc => acc.service.toLowerCase().includes(normalizedSearchTerm)); } if (isAdmin && isReportFilterActive) { accounts = accounts.filter(acc => (acc.reports || 0) >= REPORT_THRESHOLD); } accounts.sort((a, b) => b.isPinned - a.isPinned || b.id - a.id); if (accounts.length === 0) { list.innerHTML = `<div class="card p-6 text-center text-slate-400">${(normalizedSearchTerm || isReportFilterActive) ? translations[currentLang].noResults : translations[currentLang].noAccounts}</div>`; return; } viewObserver = new IntersectionObserver((entries, observer) => { entries.forEach(entry => { if (entry.isIntersecting) { incrementUniqueViewCount(entry.target.dataset.id); observer.unobserve(entry.target); } }); }, { threshold: 0.5 }); const adInterval = 4; let postCounter = 0; accounts.forEach(acc => { const card = document.createElement('div'); card.className = `card p-6 ${acc.isPinned ? 'pinned-post' : ''} ${acc.isAdminPost ? 'admin-post' : ''}`; card.dataset.id = acc.id; let adminButtonsHTML = ''; if (isAdmin) { const pinButtonIcon = acc.isPinned ? 'fa-solid fa-circle-xmark' : 'fa-solid fa-thumbtack'; adminButtonsHTML = `<button onclick="togglePin('${acc.id}')" class="bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-yellow-600 transition" title="${translations[currentLang][acc.isPinned ? 'unpin' : 'pin']}"><i class="${pinButtonIcon}"></i></button> <button onclick="unpublishAccount('${acc.id}')" class="bg-red-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-600 transition" title="${translations[currentLang].delete}"><i class="fas fa-trash-alt"></i></button>`; } const verifiedIconHTML = acc.isAdminPost ? `<span class="text-sky-400" title="${translations[currentLang].verifiedTooltip}"><i class="fas fa-check-circle"></i></span>` : ''; const pinnedIconHTML = acc.isPinned ? `<span class="text-yellow-400" title="${translations[currentLang].pinnedTooltip}"><i class="fas fa-thumbtack"></i></span>` : ''; const reportButtonHTML = !acc.isAdminPost ? `<button onclick="reportAccount('${acc.id}')" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-flag me-2"></i>${translations[currentLang].report}</button>` : ''; const publishDate = new Date(parseInt(acc.id)).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-GB'); card.innerHTML = `<div class="flex justify-between items-start"><h3 class="header-title font-bold text-2xl text-slate-100 flex items-center gap-2">${pinnedIconHTML} ${escapeHTML(acc.service)} ${verifiedIconHTML}</h3><div class="flex flex-col items-end gap-2 text-sm text-slate-400"><span id="views-${acc.id}" class="flex items-center gap-2"><i class="fas fa-eye"></i><span>${acc.views || 0}</span></span> <span id="reports-${acc.id}" class="flex items-center gap-2"><i class="fas fa-flag"></i><span>${acc.reports || 0}</span></span></div></div><p class="text-slate-500 text-sm mb-3">${translations[currentLang].postedOn} ${publishDate}</p><div class="border-t border-slate-700 pt-3 space-y-3"><div class="flex items-center"><strong class="w-24 text-slate-400">${translations[currentLang].user}:</strong><span class="font-mono">${escapeHTML(acc.username)}</span></div><div class="flex items-center"><strong class="w-24 text-slate-400">${translations[currentLang].pass}:</strong><span class="font-mono">${escapeHTML(acc.password)}</span></div></div><div class="flex justify-between items-center gap-2 mt-4 pt-4 border-t border-slate-700"><div class="flex gap-2 flex-wrap"><button onclick="copyToClipboard('${escapeHTML(acc.username)}', this)" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-copy me-2"></i>${translations[currentLang].copyUser}</button> <button onclick="copyToClipboard('${escapeHTML(acc.password)}', this)" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-copy me-2"></i>${translations[currentLang].copyPass}</button> ${reportButtonHTML}</div><div class="flex gap-2">${adminButtonsHTML}</div></div>`; list.appendChild(card); viewObserver.observe(card); postCounter++; if (postCounter % adInterval === 0 && postCounter < accounts.length) { const adCard = document.createElement('div'); adCard.className = 'ad-space h-24 w-full'; adCard.innerHTML = `<!-- يمكنك وضع كود إعلان بانر آخر هنا، مقاس 300x250 مثلاً --><span data-lang-key="adSpace">${translations[currentLang].adSpace}</span>`; list.appendChild(adCard); } }); }
         function incrementUniqueViewCount(id) { let viewedAccountsLog = getFromStorage('viewed_accounts_log'); if (viewedAccountsLog.includes(id)) return; let publicAccounts = getFromStorage('public_accounts'); const accountIndex = publicAccounts.findIndex(acc => acc.id === id); if (accountIndex !== -1) { publicAccounts[accountIndex].views = (publicAccounts[accountIndex].views || 0) + 1; saveToStorage('public_accounts', publicAccounts); viewedAccountsLog.push(id); saveToStorage('viewed_accounts_log', viewedAccountsLog); document.querySelector(`#views-${id} span`).textContent = publicAccounts[accountIndex].views; } }
         function unpublishAccount(id) { let accounts = getFromStorage('public_accounts'); accounts = accounts.filter(acc => acc.id !== id); saveToStorage('public_accounts', accounts); loadPublicAccounts(document.getElementById('search-bar').value); showToast('deleteSuccess', true); }
         function copyToClipboard(text, button) { const textarea = document.createElement('textarea'); textarea.style.position='fixed'; textarea.value=text; document.body.appendChild(textarea); textarea.select(); try { document.execCommand('copy'); const originalText = button.innerHTML; button.innerHTML = `<i class='fas fa-check-circle me-2'></i> ${translations[currentLang].copySuccess}`; button.classList.add('bg-green-600', 'text-white'); setTimeout(() => { button.innerHTML = originalText; button.classList.remove('bg-green-600', 'text-white'); }, 2000); } catch (err) { showToast('copyFail', true); } document.body.removeChild(textarea); }
