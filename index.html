@@ -99,12 +99,10 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, increment, query, orderBy, where } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, increment, query, orderBy } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
-        // Your web app's Firebase configuration that you provided
         const firebaseConfig = {
             apiKey: "AIzaSyDJKGkJNJy198d9axSevMO1ybQfVJLtIrQ",
             authDomain: "accessport-11f83.firebaseapp.com",
@@ -115,18 +113,13 @@
             measurementId: "G-Q08L80SMRF"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         
         const translations = {
-             en: {
-                pageTitle: "AccessPort - Your Gateway", subtitle: "Your gateway to digital accounts", adminModeActive: "Admin Mode Active!", exit: "Exit", navAccounts: "Accounts", navPublish: "Publish", publicListTitle: "Public Accounts List", searchPlaceholder: "Search for a game or service...", publishNewTitle: "Publish a New Account", serviceNameLabel: "Service Name", usernameLabel: "Username", usernamePlaceholder: "Username or Email", passwordLabel: "Password", passwordPlaceholder: "Account's password", publishNowButton: "Publish Now", totalAccounts: "Total Accounts Available:", noResults: "No results match your search criteria.", noAccounts: "The public list is empty. Publish an account to get started!", adminFilterButton: `Filter (Reports > ${4})`, adminFilterAll: "Show All Accounts", publishSuccess: "Account published successfully!", adminEnterSuccess: "Admin mode activated successfully!", adminExitSuccess: "Exited admin mode.", adminLoginFail: "Admin login failed. Check credentials.", reportSuccess: "Thank you! Your report has been received.", reportFail: "You have already reported this account.", deleteSuccess: "Post deleted successfully.", copySuccess: "Copied!", copyFail: "Copy failed!", user: "User", pass: "Password", copyUser: "Copy User", copyPass: "Copy Password", report: "Report", postedOn: "Posted on:", pin: "Pin", unpin: "Unpin", delete: "Delete", verifiedTooltip: "Verified post by admin", pinnedTooltip: "Pinned post",
-            },
-            ar: {
-                pageTitle: "AccessPort - منفذ الوصول", subtitle: "بوابتك للوصول إلى الحسابات الرقمية", adminModeActive: "وضع المسؤول مفعل!", exit: "خروج", navAccounts: "الحسابات", navPublish: "نشر", publicListTitle: "قائمة النشر العامة", searchPlaceholder: "ابحث عن لعبة أو خدمة...", publishNewTitle: "نشر حساب جديد", serviceNameLabel: "اسم الخدمة", usernameLabel: "المستخدم", usernamePlaceholder: "اسم المستخدم أو البريد الإلكتروني", passwordLabel: "كلمة السر", passwordPlaceholder: "كلمة سر الحساب", publishNowButton: "نشر الآن", totalAccounts: "إجمالي الحسابات المتوفرة:", noResults: "لا توجد نتائج تطابق معايير البحث.", noAccounts: "القائمة العامة فارغة. انشر حسابًا ليبدأ التفاعل!", adminFilterButton: `فرز (البلاغات > ${4})`, adminFilterAll: "عرض كل الحسابات", publishSuccess: "تم نشر الحساب بنجاح!", adminEnterSuccess: "تم تفعيل وضع المسؤول بنجاح!", adminExitSuccess: "تم الخروج من وضع المسؤول.", adminLoginFail: "فشل دخول المسؤول. تحقق من البيانات.", reportSuccess: "شكراً لك! تم استلام بلاغك.", reportFail: "لقد أبلغت عن هذا الحساب من قبل.", deleteSuccess: "تم حذف المنشور بنجاح.", copySuccess: "تم النسخ!", copyFail: "فشل النسخ!", user: "المستخدم", pass: "كلمة السر", copyUser: "نسخ المستخدم", copyPass: "نسخ كلمة السر", report: "إبلاغ", postedOn: "تم النشر في:", pin: "تثبيت", unpin: "إلغاء التثبيت", delete: "حذف", verifiedTooltip: "منشور موثوق من المسؤول", pinnedTooltip: "منشور مثبت",
-            }
+             en: { pageTitle: "AccessPort - Your Gateway", subtitle: "Your gateway to digital accounts", adminModeActive: "Admin Mode Active!", exit: "Exit", navAccounts: "Accounts", navPublish: "Publish", publicListTitle: "Public Accounts List", searchPlaceholder: "Search for a game or service...", publishNewTitle: "Publish a New Account", serviceNameLabel: "Service Name", usernameLabel: "Username", usernamePlaceholder: "Username or Email", passwordLabel: "Password", passwordPlaceholder: "Account's password", publishNowButton: "Publish Now", totalAccounts: "Total Accounts Available:", noResults: "No results match your search criteria.", noAccounts: "The public list is empty. Publish an account to get started!", adminFilterButton: `Filter (Reports > ${4})`, adminFilterAll: "Show All Accounts", publishSuccess: "Account published successfully!", adminEnterSuccess: "Admin mode activated successfully!", adminExitSuccess: "Exited admin mode.", adminLoginFail: "Admin login failed. Check credentials.", reportSuccess: "Thank you! Your report has been received.", reportFail: "You have already reported this account.", deleteSuccess: "Post deleted successfully.", copySuccess: "Copied!", copyFail: "Copy failed!", user: "User", pass: "Password", copyUser: "Copy User", copyPass: "Copy Password", report: "Report", postedOn: "Posted on:", pin: "Pin", unpin: "Unpin", delete: "Delete", verifiedTooltip: "Verified post by admin", pinnedTooltip: "Pinned post", },
+            ar: { pageTitle: "AccessPort - منفذ الوصول", subtitle: "بوابتك للوصول إلى الحسابات الرقمية", adminModeActive: "وضع المسؤول مفعل!", exit: "خروج", navAccounts: "الحسابات", navPublish: "نشر", publicListTitle: "قائمة النشر العامة", searchPlaceholder: "ابحث عن لعبة أو خدمة...", publishNewTitle: "نشر حساب جديد", serviceNameLabel: "اسم الخدمة", usernameLabel: "المستخدم", usernamePlaceholder: "اسم المستخدم أو البريد الإلكتروني", passwordLabel: "كلمة السر", passwordPlaceholder: "كلمة سر الحساب", publishNowButton: "نشر الآن", totalAccounts: "إجمالي الحسابات المتوفرة:", noResults: "لا توجد نتائج تطابق معايير البحث.", noAccounts: "القائمة العامة فارغة. انشر حسابًا ليبدأ التفاعل!", adminFilterButton: `فرز (البلاغات > ${4})`, adminFilterAll: "عرض كل الحسابات", publishSuccess: "تم نشر الحساب بنجاح!", adminEnterSuccess: "تم تفعيل وضع المسؤول بنجاح!", adminExitSuccess: "تم الخروج من وضع المسؤول.", adminLoginFail: "فشل دخول المسؤول. تحقق من البيانات.", reportSuccess: "شكراً لك! تم استلام بلاغك.", reportFail: "لقد أبلغت عن هذا الحساب من قبل.", deleteSuccess: "تم حذف المنشور بنجاح.", copySuccess: "تم النسخ!", copyFail: "فشل النسخ!", user: "المستخدم", pass: "كلمة السر", copyUser: "نسخ المستخدم", copyPass: "نسخ كلمة السر", report: "إبلاغ", postedOn: "تم النشر في:", pin: "تثبيت", unpin: "إلغاء التثبيت", delete: "حذف", verifiedTooltip: "منشور موثوق من المسؤول", pinnedTooltip: "منشور مثبت", }
         };
         let currentLang = 'ar';
         const REPORT_THRESHOLD = 5;
@@ -138,8 +131,38 @@
         const saveToStorage = (key, data) => localStorage.setItem(key, JSON.stringify(data));
         const escapeHTML = (str) => { const p = document.createElement("p"); p.textContent = str; return p.innerHTML; };
         
-        // --- FUNCTION DEFINITIONS ---
-        
+        // --- ALL FUNCTIONS MOVED TO BE GLOBALLY ACCESSIBLE ---
+        window.toggleLanguage = () => setLanguage(currentLang === 'ar' ? 'en' : 'ar');
+        window.switchView = (viewId, isLangChange = false) => {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`button[onclick="switchView('${viewId}')"]`).classList.add('active');
+            if (viewId === 'accountsView') {
+                if (!isLangChange) {
+                    const searchBar = document.getElementById('search-bar');
+                    if (searchBar) searchBar.value = '';
+                }
+                loadPublicAccounts();
+            }
+        };
+        window.handleSearch = () => loadPublicAccounts(document.getElementById('search-bar').value);
+        window.toggleReportFilter = () => { isReportFilterActive = !isReportFilterActive; loadPublicAccounts(document.getElementById('search-bar').value); checkAdminMode(); };
+        window.exitAdminMode = async () => { try { await signOut(auth); showToast('adminExitSuccess'); } catch (error) { console.error("Sign out failed:", error); } };
+        window.togglePin = async (id, currentPinStatus) => { try { await updateDoc(doc(db, "accounts", id), { isPinned: !currentPinStatus }); } catch(error) { console.error("Error pinning document: ", error); }};
+        window.unpublishAccount = async (id) => { try { await deleteDoc(doc(db, "accounts", id)); showToast('deleteSuccess', true); } catch(error) { console.error("Error deleting document: ", error); }};
+        window.reportAccount = async (id) => {
+            let reportedLog = getFromStorage('reported_accounts_log');
+            if(reportedLog.includes(id)) { showToast('reportFail', true); return; }
+            try {
+                await updateDoc(doc(db, "accounts", id), { reports: increment(1) });
+                reportedLog.push(id);
+                saveToStorage('reported_accounts_log', reportedLog);
+                showToast('reportSuccess');
+            } catch (error) { console.error("Error reporting: ", error); }
+        };
+        window.copyToClipboard = (text, button) => { const textarea = document.createElement('textarea'); textarea.style.position='fixed'; textarea.value=text; document.body.appendChild(textarea); textarea.select(); try { document.execCommand('copy'); const originalText = button.innerHTML; button.innerHTML = `<i class='fas fa-check-circle me-2'></i> ${translations[currentLang].copySuccess}`; button.classList.add('bg-green-600', 'text-white'); setTimeout(() => { button.innerHTML = originalText; button.classList.remove('bg-green-600', 'text-white'); }, 2000); } catch (err) { showToast('copyFail', true); } document.body.removeChild(textarea); };
+
         function setLanguage(lang) {
             currentLang = lang;
             document.documentElement.lang = lang;
@@ -148,40 +171,20 @@
 
             document.querySelectorAll('[data-lang-key]').forEach(el => {
                 const key = el.dataset.langKey;
-                const translation = translations[lang][key];
-                if (translation !== undefined) {
+                if(translations[lang][key] !== undefined){
                     if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                        el.placeholder = translation;
+                        el.placeholder = translations[lang][key];
                     } else {
-                        el.innerHTML = translation;
+                        el.innerHTML = translations[lang][key];
                     }
                 }
             });
             
             document.getElementById('lang-toggle').textContent = lang === 'ar' ? 'EN' : 'AR';
             const activeView = document.querySelector('.view.active')?.id || 'accountsView';
-            switchView(activeView, true);
+            window.switchView(activeView, true);
         }
 
-        function toggleLanguage() {
-            setLanguage(currentLang === 'ar' ? 'en' : 'ar');
-        }
-
-        function switchView(viewId, isLangChange = false) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`button[onclick="switchView('${viewId}')"]`).classList.add('active');
-            
-            if (viewId === 'accountsView') {
-                if (!isLangChange) {
-                    const searchBar = document.getElementById('search-bar');
-                    if (searchBar) searchBar.value = '';
-                }
-                loadPublicAccounts();
-            }
-        }
-        
         function showToast(key, isError = false) {
             const message = translations[currentLang][key] || key;
             const toast = document.getElementById('toast');
@@ -195,13 +198,13 @@
             document.getElementById('admin-controls').style.display = isAdmin ? 'block' : 'none';
             const adminFilterContainer = document.getElementById('admin-filter-container');
             if(isAdmin) {
-                const buttonText = isReportFilterActive ? translations[currentLang].adminFilterAll : `${translations[currentLang].adminFilterButton}`;
+                const buttonText = isReportFilterActive ? translations[currentLang].adminFilterAll : translations[currentLang].adminFilterButton;
                 adminFilterContainer.innerHTML = `<button onclick="toggleReportFilter()" class="w-full md:w-auto p-4 rounded-full bg-orange-500 text-white font-bold hover:bg-orange-600 transition shadow-sm"><i class="fas fa-filter"></i> ${buttonText}</button>`;
             } else {
                 adminFilterContainer.innerHTML = '';
             }
         }
-
+        
         async function handleFormSubmit(e) {
             e.preventDefault();
             const service = document.getElementById('publish-service').value;
@@ -210,124 +213,44 @@
             if (service.toLowerCase() === 'dragon' && password === 'dragon57t') {
                 try {
                     await signInWithEmailAndPassword(auth, "admin@accessport.com", password);
-                    showToast('adminEnterSuccess');
-                    switchView('accountsView');
-                } catch (error) {
-                    console.error("Admin login failed:", error);
-                    showToast('adminLoginFail', true);
-                }
+                } catch (error) { showToast('adminLoginFail', true); }
                 e.target.reset();
                 return;
             }
             
-            addPublicAccount(e);
-        }
-
-        async function exitAdminMode() {
-            try {
-                await signOut(auth);
-                showToast('adminExitSuccess');
-            } catch (error) {
-                console.error("Sign out failed:", error);
-            }
-        }
-
-        function toggleReportFilter() {
-            isReportFilterActive = !isReportFilterActive;
-            loadPublicAccounts(document.getElementById('search-bar').value);
-            checkAdminMode();
-        }
-
-        function enterAdminMode() {
-             // This function is now handled by signInWithEmailAndPassword
-        }
-        
-        async function addPublicAccount(e) {
             try {
                 await addDoc(collection(db, "accounts"), {
                     service: document.getElementById('publish-service').value,
                     username: document.getElementById('publish-username').value,
                     password: document.getElementById('publish-password').value,
-                    views: 0,
-                    reports: 0,
-                    isAdminPost: isAdmin,
-                    isPinned: false,
-                    createdAt: new Date()
+                    views: 0, reports: 0, isAdminPost: isAdmin, isPinned: false, createdAt: new Date()
                 });
                 e.target.reset();
                 showToast('publishSuccess');
-                switchView('accountsView');
-            } catch (error) {
-                console.error("Error adding document: ", error);
-            }
+                window.switchView('accountsView');
+            } catch (error) { console.error("Error adding document: ", error); }
         }
-
-        async function reportAccount(id) {
-            let reportedLog = getFromStorage('reported_accounts_log');
-            if(reportedLog.includes(id)) { showToast('reportFail', true); return; }
-            try {
-                const docRef = doc(db, "accounts", id);
-                await updateDoc(docRef, { reports: increment(1) });
-                reportedLog.push(id);
-                saveToStorage('reported_accounts_log', reportedLog);
-                showToast('reportSuccess');
-            } catch (error) { console.error("Error reporting: ", error); }
-        }
-
-        function handleSearch() {
-            loadPublicAccounts(document.getElementById('search-bar').value);
-        }
-
-        async function togglePin(id, currentPinStatus) {
-             try {
-                const docRef = doc(db, "accounts", id);
-                await updateDoc(docRef, { isPinned: !currentPinStatus });
-            } catch(error) { console.error("Error pinning document: ", error); }
-        }
-
-        async function unpublishAccount(id) {
-            try {
-                await deleteDoc(doc(db, "accounts", id));
-                showToast('deleteSuccess', true);
-            } catch(error) { console.error("Error deleting document: ", error); }
-        }
-
+        
         async function incrementUniqueViewCount(id) {
             let viewedAccountsLog = getFromStorage('viewed_accounts_log');
             if (viewedAccountsLog.includes(id)) return;
             try {
-                const docRef = doc(db, "accounts", id);
-                await updateDoc(docRef, { views: increment(1) });
+                await updateDoc(doc(db, "accounts", id), { views: increment(1) });
                 viewedAccountsLog.push(id);
                 saveToStorage('viewed_accounts_log', viewedAccountsLog);
             } catch(error) { console.error("Error incrementing view: ", error); }
         }
-
-        function copyToClipboard(text, button) {
-            const textarea = document.createElement('textarea');
-            textarea.style.position='fixed'; textarea.value=text; document.body.appendChild(textarea); textarea.select();
-            try {
-                document.execCommand('copy');
-                const originalText = button.innerHTML;
-                button.innerHTML = `<i class='fas fa-check-circle me-2'></i> ${translations[currentLang].copySuccess}`;
-                button.classList.add('bg-green-600', 'text-white');
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                    button.classList.remove('bg-green-600', 'text-white');
-                }, 2000);
-            } catch (err) {
-                showToast('copyFail', true);
-            }
-            document.body.removeChild(textarea);
-        }
-
+        
         function loadPublicAccounts(searchTerm = '') {
             const list = document.getElementById('public-accounts-list');
             const counterElement = document.getElementById('accounts-counter');
-            let q = query(collection(db, "accounts"), orderBy("createdAt", "desc"));
+            
+            // **FIX:** Removed orderBy from the query to avoid needing a composite index.
+            const q = query(collection(db, "accounts"));
             
             onSnapshot(q, (snapshot) => {
                 let allAccounts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
                 counterElement.innerHTML = `${translations[currentLang].totalAccounts} <span class="font-mono text-sky-400">${allAccounts.length}</span>`;
                 let accountsToRender = allAccounts;
 
@@ -338,7 +261,11 @@
                 if (isAdmin && isReportFilterActive) {
                     accountsToRender = accountsToRender.filter(acc => (acc.reports || 0) >= REPORT_THRESHOLD);
                 }
-                accountsToRender.sort((a, b) => b.isPinned - a.isPinned);
+                // **FIX:** Sorting is now done on the client-side.
+                accountsToRender.sort((a, b) => {
+                    if (a.isPinned !== b.isPinned) return b.isPinned - a.isPinned;
+                    return b.createdAt.seconds - a.createdAt.seconds;
+                });
 
                 list.innerHTML = '';
                 if (viewObserver) viewObserver.disconnect();
@@ -401,17 +328,14 @@
             });
         }
         
-        // Make functions globally accessible (FIXED)
-        window.toggleLanguage = toggleLanguage;
-        window.switchView = switchView;
-        window.handleSearch = handleSearch;
-        window.toggleReportFilter = toggleReportFilter;
-        window.exitAdminMode = exitAdminMode;
-        window.togglePin = togglePin;
-        window.unpublishAccount = unpublishAccount;
-        window.reportAccount = reportAccount;
-        window.copyToClipboard = copyToClipboard;
-        
+        document.addEventListener('DOMContentLoaded', () => {
+            onAuthStateChanged(auth, (user) => {
+                isAdmin = !!user;
+                checkAdminMode();
+                loadPublicAccounts();
+            });
+        });
+
     </script>
 </body>
 </html>
