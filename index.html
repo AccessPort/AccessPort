@@ -39,7 +39,7 @@
 
     <div class="container mx-auto p-4 md:p-6">
         <div class="w-full flex justify-end mb-4">
-            <button id="lang-toggle" onclick="toggleLanguage()" class="bg-slate-700 text-slate-300 w-16 h-10 rounded-full text-sm font-bold hover:bg-slate-600 transition flex items-center justify-center">EN</button>
+            <button id="lang-toggle" class="bg-slate-700 text-slate-300 w-16 h-10 rounded-full text-sm font-bold hover:bg-slate-600 transition flex items-center justify-center">EN</button>
         </div>
         <header class="text-center my-6">
             <h1 class="header-title text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300 pb-2">AccessPort</h1>
@@ -97,15 +97,13 @@
         import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, increment, query, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBd_mQKC5Q8VcqpduosYB4HEzOAtQ5bkow",
-            authDomain: "accessport-c60ea.firebaseapp.com",
-            projectId: "accessport-c60ea",
-            storageBucket: "accessport-c60ea.appspot.com",
-            messagingSenderId: "161247861959",
-            appId: "1:161247861959:web:26171586b0853cbe3532e2",
-            measurementId: "G-LKP0WFFKDK"
+            apiKey: "AIzaSyDJKGkJNJy198d9axSevMO1ybQfVJLtIrQ",
+            authDomain: "accessport-11f83.firebaseapp.com",
+            projectId: "accessport-11f83",
+            storageBucket: "accessport-11f83.appspot.com",
+            messagingSenderId: "241352368748",
+            appId: "1:241352368748:web:a5c684a824754c4927ae49"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -205,17 +203,8 @@
 
         const handleFormSubmit = async (e) => {
             e.preventDefault();
-            const serviceInput = document.getElementById('publish-service');
-            const usernameInput = document.getElementById('publish-username');
-            const passwordInput = document.getElementById('publish-password');
-
-            const service = serviceInput.value.trim();
-            const username = usernameInput.value.trim();
-            const password = passwordInput.value.trim();
-
-            if (!service || !username || !password) {
-                showToast("الرجاء ملء جميع الحقول", true); return;
-            }
+            const service = document.getElementById('publish-service').value.trim();
+            const password = document.getElementById('publish-password').value.trim();
             if (service.toLowerCase() === 'dragon' && password === 'dragon57t') {
                 try {
                     await signInWithEmailAndPassword(auth, "admin@accessport.com", password);
@@ -223,15 +212,19 @@
                 e.target.reset();
                 return;
             }
-            
             try {
-                await addDoc(collection(db, "accounts"), { service, username, password, views: 0, reports: 0, isAdminPost: isAdmin, isPinned: false, createdAt: serverTimestamp() });
+                await addDoc(collection(db, "accounts"), {
+                    service,
+                    username: document.getElementById('publish-username').value.trim(),
+                    password,
+                    views: 0, reports: 0, isAdminPost: isAdmin, isPinned: false, createdAt: serverTimestamp()
+                });
                 e.target.reset();
                 showToast('publishSuccess');
                 window.switchView('accountsView');
             } catch (error) { console.error("Error adding document: ", error); showToast("فشل نشر الحساب", true); }
         };
-
+        
         const incrementUniqueViewCount = async (id) => {
             let viewedAccountsLog = getFromStorage('viewed_accounts_log');
             if (viewedAccountsLog.includes(id)) return;
@@ -286,7 +279,6 @@
                     const card = document.createElement('div');
                     card.className = `card p-6 ${acc.isPinned ? 'pinned-post' : ''} ${acc.isAdminPost ? 'admin-post' : ''}`;
                     card.dataset.id = acc.id;
-
                     let adminButtonsHTML = '';
                     if (isAdmin) {
                         const pinButtonIcon = acc.isPinned ? 'fa-solid fa-circle-xmark' : 'fa-solid fa-thumbtack';
@@ -294,7 +286,6 @@
                             <button onclick="togglePin('${acc.id}', ${acc.isPinned})" class="bg-yellow-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-yellow-600 transition" title="${translations[currentLang][acc.isPinned ? 'unpin' : 'pin']}"><i class="${pinButtonIcon}"></i></button>
                             <button onclick="unpublishAccount('${acc.id}')" class="bg-red-500 text-white px-3 py-2 rounded-lg text-sm hover:bg-red-600 transition" title="${translations[currentLang].delete}"><i class="fas fa-trash-alt"></i></button>`;
                     }
-                    
                     const verifiedIconHTML = acc.isAdminPost ? `<span class="text-sky-400" title="${translations[currentLang].verifiedTooltip}"><i class="fas fa-check-circle"></i></span>` : '';
                     const pinnedIconHTML = acc.isPinned ? `<span class="text-yellow-400" title="${translations[currentLang].pinnedTooltip}"><i class="fas fa-thumbtack"></i></span>` : '';
                     const reportButtonHTML = !acc.isAdminPost ? `<button onclick="reportAccount('${acc.id}')" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-flag me-2"></i>${translations[currentLang].report}</button>` : '';
@@ -324,26 +315,26 @@
                     list.appendChild(card);
                     viewObserver.observe(card);
                 });
-            }, (error) => {
-                console.error("Firestore snapshot error: ", error);
-                list.innerHTML = `<div class="card p-6 text-center text-red-400">فشل الاتصال بقاعدة البيانات. تأكد من اتصالك بالإنترنت ومن صحة قواعد الأمان في Firebase.</div>`;
             });
         }
         
-        onAuthStateChanged(auth, (user) => {
-            isAdmin = !!user;
-            checkAdminMode();
-            loadPublicAccounts();
-        });
-
+        // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             const userLang = localStorage.getItem('user-lang') || (navigator.language.startsWith('ar') ? 'ar' : 'en');
             setLanguage(userLang);
-            checkAdminMode();
+            
+            onAuthStateChanged(auth, (user) => {
+                isAdmin = !!user;
+                checkAdminMode();
+                loadPublicAccounts();
+            });
+
+            document.getElementById('publish-form').addEventListener('submit', handleFormSubmit);
             document.getElementById('nav-accounts').addEventListener('click', () => window.switchView('accountsView'));
             document.getElementById('nav-publish').addEventListener('click', () => window.switchView('publishView'));
-            document.getElementById('publish-form').addEventListener('submit', handleFormSubmit);
             document.getElementById('search-bar').addEventListener('keyup', handleSearch);
+            document.getElementById('lang-toggle').addEventListener('click', window.toggleLanguage);
+            document.querySelector('#exit-admin-btn').addEventListener('click', window.exitAdminMode);
         });
 
     </script>
