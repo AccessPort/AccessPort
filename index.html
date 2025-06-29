@@ -120,7 +120,6 @@
         let isReportFilterActive = false;
         let isAdmin = false;
         let unsubscribe;
-        let viewObserver = null;
 
         const getFromStorage = (key) => JSON.parse(localStorage.getItem(key)) || [];
         const saveToStorage = (key, data) => localStorage.setItem(key, JSON.stringify(data));
@@ -131,7 +130,6 @@
             document.documentElement.lang = lang;
             document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
             localStorage.setItem('user-lang', lang);
-
             const elements = {
                 'subtitle': document.getElementById('subtitle'), 'adminModeActive': document.getElementById('admin-mode-text'),
                 'exit': document.querySelector('#exit-admin-btn span'), 'navAccounts': document.querySelector('#nav-accounts span'),
@@ -141,7 +139,6 @@
                 'usernamePlaceholder': document.getElementById('publish-username'), 'passwordLabel': document.getElementById('password-label'),
                 'passwordPlaceholder': document.getElementById('publish-password'), 'publishNowButton': document.getElementById('publish-now-button')
             };
-            
             for (const key in elements) {
                 if (elements[key]) {
                     const translation = translations[lang][key];
@@ -199,14 +196,14 @@
             } catch (error) { console.error("Error adding document: ", error); showToast("فشل نشر الحساب", true); }
         };
         
-        async function incrementUniqueViewCount(id) {
+        async function incrementViewCount(id) {
             let viewedAccountsLog = getFromStorage('viewed_accounts_log');
             if (viewedAccountsLog.includes(id)) return;
             try {
                 await updateDoc(doc(db, "accounts", id), { views: increment(1) });
                 viewedAccountsLog.push(id);
                 saveToStorage('viewed_accounts_log', viewedAccountsLog);
-            } catch(error) { console.error("Error incrementing view: ", error); }
+            } catch(error) { console.error("Error incrementing view count:", error); }
         };
 
         function loadPublicAccounts(searchTerm = '') {
@@ -232,13 +229,6 @@
                 });
 
                 list.innerHTML = '';
-                if (viewObserver) viewObserver.disconnect();
-                viewObserver = new IntersectionObserver((entries, observer) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) { incrementUniqueViewCount(entry.target.dataset.id); observer.unobserve(entry.target); }
-                    });
-                }, { threshold: 0.5 });
-                
                 if (accountsToRender.length === 0) {
                      list.innerHTML = `<div class="card p-6 text-center text-slate-400">${(normalizedSearchTerm || isReportFilterActive) ? translations[currentLang].noResults : translations[currentLang].noAccounts}</div>`;
                      return;
@@ -250,7 +240,6 @@
                     card.dataset.id = acc.id;
                     card.innerHTML = getCardHTML(acc);
                     list.appendChild(card);
-                    viewObserver.observe(card);
                 });
             }, (error) => {
                 console.error("Firestore snapshot error: ", error);
@@ -270,7 +259,7 @@
             const pinnedIconHTML = acc.isPinned ? `<span class="text-yellow-400" title="${translations[currentLang].pinnedTooltip}"><i class="fas fa-thumbtack"></i></span>` : '';
             const reportButtonHTML = !acc.isAdminPost ? `<button data-action="report" data-id="${acc.id}" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-flag me-2"></i>${translations[currentLang].report}</button>` : '';
             const publishDate = acc.createdAt ? new Date(acc.createdAt.seconds * 1000).toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-GB') : 'N/A';
-            return `<div class="flex justify-between items-start"><h3 class="header-title font-bold text-2xl text-slate-100 flex items-center gap-2">${pinnedIconHTML} ${escapeHTML(acc.service)} ${verifiedIconHTML}</h3><div class="flex flex-col items-end gap-2 text-sm text-slate-400"><span id="views-${acc.id}" class="flex items-center gap-2"><i class="fas fa-eye"></i><span>${acc.views || 0}</span></span> <span id="reports-${acc.id}" class="flex items-center gap-2"><i class="fas fa-flag"></i><span>${acc.reports || 0}</span></span></div></div><p class="text-slate-500 text-sm mb-3">${translations[currentLang].postedOn} ${publishDate}</p><div class="border-t border-slate-700 pt-3 space-y-3"><div class="flex items-center"><strong class="w-24 text-slate-400">${translations[currentLang].user}:</strong><span class="font-mono">${escapeHTML(acc.username)}</span></div><div class="flex items-center"><strong class="w-24 text-slate-400">${translations[currentLang].pass}:</strong><span class="font-mono">${escapeHTML(acc.password)}</span></div></div><div class="flex justify-between items-center gap-2 mt-4 pt-4 border-t border-slate-700"><div class="flex gap-2 flex-wrap"><button data-action="copy" data-text="${escapeHTML(acc.username)}" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-copy me-2"></i>${translations[currentLang].copyUser}</button> <button data-action="copy" data-text="${escapeHTML(acc.password)}" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-copy me-2"></i>${translations[currentLang].copyPass}</button> ${reportButtonHTML}</div><div class="flex gap-2">${adminButtonsHTML}</div></div>`;
+            return `<div class="flex justify-between items-start"><h3 class="header-title font-bold text-2xl text-slate-100 flex items-center gap-2">${pinnedIconHTML} ${escapeHTML(acc.service)} ${verifiedIconHTML}</h3><div class="flex flex-col items-end gap-2 text-sm text-slate-400"><span id="views-${acc.id}" class="flex items-center gap-2"><i class="fas fa-eye"></i><span>${acc.views || 0}</span></span> <span id="reports-${acc.id}" class="flex items-center gap-2"><i class="fas fa-flag"></i><span>${acc.reports || 0}</span></span></div></div><p class="text-slate-500 text-sm mb-3">${translations[currentLang].postedOn} ${publishDate}</p><div class="border-t border-slate-700 pt-3 space-y-3"><div class="flex items-center"><strong class="w-24 text-slate-400">${translations[currentLang].user}:</strong><span class="font-mono">${escapeHTML(acc.username)}</span></div><div class="flex items-center"><strong class="w-24 text-slate-400">${translations[currentLang].pass}:</strong><span class="font-mono">${escapeHTML(acc.password)}</span></div></div><div class="flex justify-between items-center gap-2 mt-4 pt-4 border-t border-slate-700"><div class="flex gap-2 flex-wrap"><button data-action="copy" data-id="${acc.id}" data-text="${escapeHTML(acc.username)}" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-copy me-2"></i>${translations[currentLang].copyUser}</button> <button data-action="copy" data-id="${acc.id}" data-text="${escapeHTML(acc.password)}" class="bg-slate-700 text-slate-300 px-3 py-1 rounded-lg text-sm hover:bg-slate-600 transition flex items-center"><i class="fas fa-copy me-2"></i>${translations[currentLang].copyPass}</button> ${reportButtonHTML}</div><div class="flex gap-2">${adminButtonsHTML}</div></div>`;
         }
 
         async function unpublishAccount(id) { try { await deleteDoc(doc(db, "accounts", id)); showToast('deleteSuccess', true); } catch(error) { console.error("Delete error", error); }};
@@ -285,7 +274,19 @@
                 showToast('reportSuccess');
             } catch (error) { console.error("Report error", error); }
         };
-        function copyToClipboard(text, button) { const textarea = document.createElement('textarea'); textarea.style.position='fixed'; textarea.value=text; document.body.appendChild(textarea); textarea.select(); try { document.execCommand('copy'); const originalText = button.innerHTML; button.innerHTML = `<i class='fas fa-check-circle me-2'></i> ${translations[currentLang].copySuccess}`; button.classList.add('bg-green-600', 'text-white'); setTimeout(() => { button.innerHTML = originalText; button.classList.remove('bg-green-600', 'text-white'); }, 2000); } catch (err) { showToast('copyFail', true); } document.body.removeChild(textarea); };
+        function copyToClipboard(text, button) { 
+            incrementViewCount(button.dataset.id);
+            const textarea = document.createElement('textarea'); 
+            textarea.style.position='fixed'; textarea.value=text; document.body.appendChild(textarea); textarea.select(); 
+            try { 
+                document.execCommand('copy'); 
+                const originalText = button.innerHTML; 
+                button.innerHTML = `<i class='fas fa-check-circle me-2'></i> ${translations[currentLang].copySuccess}`; 
+                button.classList.add('bg-green-600', 'text-white'); 
+                setTimeout(() => { button.innerHTML = originalText; button.classList.remove('bg-green-600', 'text-white'); }, 2000); 
+            } catch (err) { showToast('copyFail', true); } 
+            document.body.removeChild(textarea); 
+        };
 
         function switchView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -296,6 +297,12 @@
                 document.getElementById('search-bar').value = '';
                 loadPublicAccounts();
             }
+        }
+
+        function toggleReportFilter() {
+            isReportFilterActive = !isReportFilterActive;
+            loadPublicAccounts(document.getElementById('search-bar').value);
+            checkAdminMode();
         }
 
         // --- Event Listeners Initialization ---
