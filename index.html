@@ -200,7 +200,8 @@
             let viewedAccountsLog = getFromStorage('viewed_accounts_log');
             if (viewedAccountsLog.includes(id)) return;
             try {
-                await updateDoc(doc(db, "accounts", id), { views: increment(1) });
+                const docRef = doc(db, "accounts", id);
+                await updateDoc(docRef, { views: increment(1) });
                 viewedAccountsLog.push(id);
                 saveToStorage('viewed_accounts_log', viewedAccountsLog);
             } catch(error) { console.error("Error incrementing view count:", error); }
@@ -275,7 +276,7 @@
             } catch (error) { console.error("Report error", error); }
         };
         function copyToClipboard(text, button) { 
-            incrementViewCount(button.dataset.id);
+            incrementViewCount(button.dataset.id); // Increment view count on copy
             const textarea = document.createElement('textarea'); 
             textarea.style.position='fixed'; textarea.value=text; document.body.appendChild(textarea); textarea.select(); 
             try { 
